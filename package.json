@@ -1,0 +1,16 @@
+{
+  "name": "scripttags-tester",
+  "version": "1.0.0",
+  "description": "When editing the scriptTags.ts, should update the src/lib/components/shared/luckyDraw/LuckyDraw.ts",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

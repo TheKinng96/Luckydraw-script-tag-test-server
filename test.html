@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Test Script Tag</title>
+
+		<script type="text/javascript" src="./rawTags-refactored.js" async=""></script>
+		<script>
+			function base64ToBytes(b64) {
+				const bin = atob(b64)
+				const arr = new Uint8Array(bin.length)
+				for (let i = 0; i < bin.length; i++) {
+					arr[i] = bin.charCodeAt(i)
+				}
+				return arr
+			}
+
+			async function generateSignature() {
+				const key = document.getElementById('key-input').value
+				const payload = document.getElementById('payload-input').value
+				const keyBytes = base64ToBytes(key)
+
+				const subtleKey = await crypto.subtle.importKey(
+					'raw',
+					keyBytes,
+					{ name: 'HMAC', hash: 'SHA-256' },
+					false,
+					['sign'],
+				)
+
+				const sigBuffer = await crypto.subtle.sign(
+					'HMAC',
+					subtleKey,
+					new TextEncoder().encode(payload),
+				)
+
+				const signature = Array.from(new Uint8Array(sigBuffer))
+					.map((b) => b.toString(16).padStart(2, '0'))
+					.join('')
+
+				document.getElementById('signature-output').textContent = signature
+			}
+
+			async function getHmacKey() {
+				try {
+					const response = await fetch('http://localhost:5173/api/hmac')
+					if (!response.ok) {
+						throw new Error(`HTTP error! status: ${response.status}`)
+					}
+					const data = await response.json()
+					document.getElementById('key-input').value = data.key
+					document.getElementById('key-id-output').textContent = data.keyId
+				} catch (error) {
+					console.error('Failed to fetch HMAC key:', error)
+					alert('Failed to fetch HMAC key. See console for details.')
+				}
+			}
+
+			function copySignature() {
+				const signature = document.getElementById('signature-output').textContent
+				navigator.clipboard.writeText(signature).then(
+					function () {
+						alert('Signature copied to clipboard!')
+					},
+					function (err) {
+						console.error('Could not copy text: ', err)
+					},
+				)
+			}
+		</script>
+		<style>
+			main {
+				width: 100%;
+				height: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				flex-direction: column;
+			}
+
+			pre {
+				user-select: all;
+			}
+		</style>
+		<script src="main.js" defer></script>
+	</head>
+	<body>
+		<main>
+			<div id="content"></div>
+			<p>Script tag local built Remember to check your PUBLIC_APP_URL on rawTags-refactored.js</p>
+
+			<div>
+				<button onclick="getHmacKey()">Get HMAC Key</button><br /><br />
+
+				<label for="key-id-output">Key ID:</label><br />
+				<pre id="key-id-output"></pre>
+				<br />
+
+				<label for="key-input">Key (Base64):</label><br />
+				<input type="text" id="key-input" size="50" /><br /><br />
+
+				<label for="payload-input">Payload (JSON):</label><br />
+				<textarea id="payload-input" rows="10" cols="50"></textarea><br /><br />
+
+				<button onclick="generateSignature()">Generate Signature</button><br /><br />
+
+				<label for="signature-output">Generated Signature:</label><br />
+				<pre id="signature-output"></pre>
+				<br />
+
+				<button onclick="copySignature()">Copy Signature</button>
+			</div>
+		</main>
+	</body>
+</html>
