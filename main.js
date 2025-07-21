@@ -11,13 +11,15 @@ function handleRouting() {
     }
 
     // Simple routing logic
-    if (path.includes('/cart')) {
-        contentDiv.innerHTML = '<h1>Cart Page</h1><p>This is the shopping cart.</p>';
-    } else if (path.includes('/profile')) {
-        contentDiv.innerHTML = '<h1>Profile Page</h1><p>This is the user profile.</p>';
-    } else {
-        contentDiv.innerHTML = '<h1>Home Page</h1><p>Welcome to the main page.</p>';
-    }
+    const routes = {
+        '/cart': '<h1>Cart Page</h1><p>This is the shopping cart.</p>',
+        '/profile': '<h1>Profile Page</h1><p>This is the user profile.</p>',
+        '/products': '<h1>Products Page</h1><p>This is the product list.</p>',
+        '/': '<h1>Home Page</h1><p>Welcome to the main page.</p>',
+    };
+
+    const content = routes[path] || `<h1>${path} Page</h1><p>You are currently on ${path}</p>`;
+    contentDiv.innerHTML = content;
 }
 
 // Handle routing on initial page load
